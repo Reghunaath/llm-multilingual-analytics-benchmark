@@ -68,6 +68,28 @@ def _generate_gemini(messages: list[dict], api_key: str) -> str:
         raise LLMError("Gemini", f"API error: {e}")
 
 
+def _generate_perplexity(messages: list[dict], api_key: str) -> str:
+    try:
+        client = openai.OpenAI(
+            api_key=api_key,
+            base_url="https://api.perplexity.ai",
+        )
+        response = client.chat.completions.create(
+            model="sonar-reasoning-pro",
+            messages=messages,
+            temperature=TEMPERATURE,
+        )
+        return response.choices[0].message.content
+    except openai.AuthenticationError:
+        raise LLMError("Perplexity", "Invalid API key. Check your Perplexity API key.")
+    except openai.RateLimitError:
+        raise LLMError("Perplexity", "Rate limit exceeded. Please wait and try again.")
+    except openai.APIConnectionError:
+        raise LLMError("Perplexity", "Network error. Could not reach the Perplexity API.")
+    except openai.APIError as e:
+        raise LLMError("Perplexity", f"API error: {e}")
+
+
 def generate(model_name: str, messages: list[dict], api_keys: dict) -> str:
     """Generate a response from the specified model.
 
@@ -89,6 +111,11 @@ def generate(model_name: str, messages: list[dict], api_keys: dict) -> str:
         if not key:
             raise LLMError("Gemini", "API key not provided.")
         raw = _generate_gemini(messages, key)
+    elif model_name == "sonar-reasoning-pro":
+        key = api_keys.get("perplexity", "")
+        if not key:
+            raise LLMError("Perplexity", "API key not provided.")
+        raw = _generate_perplexity(messages, key)
     else:
         raise LLMError("Unknown", f"Unsupported model: {model_name}")
 

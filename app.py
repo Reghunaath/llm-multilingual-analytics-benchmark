@@ -25,8 +25,13 @@ with st.sidebar:
         type="password",
         value=os.getenv("GOOGLE_API_KEY", ""),
     )
+    perplexity_key = st.text_input(
+        "Perplexity API Key",
+        type="password",
+        value=os.getenv("PERPLEXITY_API_KEY", ""),
+    )
 
-api_keys = {"openai": openai_key, "google": google_key}
+api_keys = {"openai": openai_key, "google": google_key, "perplexity": perplexity_key}
 
 # ── Main area ──────────────────────────────────────────────────────────────────
 schema = st.text_area(
@@ -44,7 +49,7 @@ col_model, col_output = st.columns(2)
 with col_model:
     model_choice = st.radio(
         "Model",
-        ["GPT-5.4", "Gemini 3.1 Pro", "Compare Both"],
+        ["GPT-5.4", "Gemini 3.1 Pro", "Sonar Reasoning Pro", "Compare All"],
         horizontal=True,
     )
 with col_output:
@@ -57,9 +62,14 @@ with col_output:
 MODEL_MAP = {
     "GPT-5.4": ["gpt-5.4"],
     "Gemini 3.1 Pro": ["gemini-3.1-pro-preview"],
-    "Compare Both": ["gpt-5.4", "gemini-3.1-pro-preview"],
+    "Sonar Reasoning Pro": ["sonar-reasoning-pro"],
+    "Compare All": ["gpt-5.4", "gemini-3.1-pro-preview", "sonar-reasoning-pro"],
 }
-MODEL_LABELS = {"gpt-5.4": "GPT-5.4", "gemini-3.1-pro-preview": "Gemini 3.1 Pro"}
+MODEL_LABELS = {
+    "gpt-5.4": "GPT-5.4",
+    "gemini-3.1-pro-preview": "Gemini 3.1 Pro",
+    "sonar-reasoning-pro": "Sonar Reasoning Pro",
+}
 
 # ── Generate ───────────────────────────────────────────────────────────────────
 if st.button("Generate", type="primary"):

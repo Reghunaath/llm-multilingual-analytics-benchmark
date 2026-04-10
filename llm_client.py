@@ -16,7 +16,7 @@ class LLMError(Exception):
 
 def _clean_code_output(text: str) -> str:
     """Strip markdown code fences from LLM output."""
-    cleaned = re.sub(r"^```(?:sql|python|py)?\s*\n?", "", text.strip())
+    cleaned = re.sub(r"^```(?:sql|python|py|r|R)?\s*\n?", "", text.strip())
     cleaned = re.sub(r"\n?```\s*$", "", cleaned)
     return cleaned.strip()
 

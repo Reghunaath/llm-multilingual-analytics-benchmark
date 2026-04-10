@@ -4,7 +4,7 @@ import streamlit as st
 from dotenv import load_dotenv
 
 from llm_client import generate, LLMError
-from prompts import build_sql_prompt, build_pandas_prompt
+from prompts import build_sql_prompt, build_pandas_prompt, build_r_prompt
 from schema_parser import validate_schema
 
 load_dotenv()
@@ -55,7 +55,7 @@ with col_model:
 with col_output:
     output_type = st.radio(
         "Output Type",
-        ["SQL", "Pandas", "Both"],
+        ["SQL", "Pandas", "R", "All"],
         horizontal=True,
     )
 
@@ -83,10 +83,12 @@ if st.button("Generate", type="primary"):
         else:
             models = MODEL_MAP[model_choice]
             prompt_builders = []
-            if output_type in ("SQL", "Both"):
+            if output_type in ("SQL", "All"):
                 prompt_builders.append(("SQL", build_sql_prompt))
-            if output_type in ("Pandas", "Both"):
+            if output_type in ("Pandas", "All"):
                 prompt_builders.append(("Pandas", build_pandas_prompt))
+            if output_type in ("R", "All"):
+                prompt_builders.append(("R", build_r_prompt))
 
             # Determine layout: side-by-side for Compare Both, else single column
             if len(models) > 1:
@@ -101,7 +103,7 @@ if st.button("Generate", type="primary"):
                         messages = builder(schema, question)
                         try:
                             result = generate(model_id, messages, api_keys)
-                            lang = "sql" if label == "SQL" else "python"
+                            lang = "sql" if label == "SQL" else "r" if label == "R" else "python"
                             st.markdown(f"**{label}**")
                             st.code(result, language=lang)
                         except LLMError as e:
